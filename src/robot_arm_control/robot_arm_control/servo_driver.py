@@ -20,7 +20,7 @@ DEVICE_NAME = '/dev/ttyACM0'  # Adjust this to match your port
 
 # Define your servo IDs
 SERVO_IDS = [1, 2, 3, 4, 5, 6]  # Adjust these to match your servo IDs
-JOINT_NAMES = ['joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6']  # Adjust names
+JOINT_NAMES = ['Shoulder_Rotation', 'Shoulder_Pitch', 'Elbow', 'Wrist_Pitch', 'Wrist_Roll', 'Gripper']  # Adjust names
 
 class ServoDriver(Node):
     def __init__(self):
@@ -46,12 +46,7 @@ class ServoDriver(Node):
             self.get_logger().error("Failed to change the baudrate")
             return
 
-        # Initialize publishers and subscribers
-        self.subscription = self.create_subscription(
-            JointState,
-            'joint_states',
-            self.joint_state_callback,
-            10)
+        # Only create publisher, remove subscriber to prevent movement commands
         self.publisher = self.create_publisher(JointState, 'joint_states', 10)
 
         # Timer for publishing current positions
@@ -85,26 +80,10 @@ class ServoDriver(Node):
                 positions.append(0.0)
         
         msg.position = positions
-        msg.velocity = []  # Optional: Add velocities if needed
-        msg.effort = []    # Optional: Add efforts if needed
+        msg.velocity = []
+        msg.effort = []
         
         self.publisher.publish(msg)
-
-    def joint_state_callback(self, msg):
-        """Handle incoming joint commands"""
-        for name, position in zip(msg.name, msg.position):
-            if name in JOINT_NAMES:
-                servo_id = SERVO_IDS[JOINT_NAMES.index(name)]
-                # Convert position from radians to servo units
-                servo_pos = int(position * (2048.0 / 3.14159))  # Convert radians to servo units
-                result, error = self.packet_handler.write2ByteTxRx(
-                    self.port_handler, 
-                    servo_id, 
-                    42,  # 42 is the address for Goal_Position
-                    servo_pos
-                )
-                if result != COMM_SUCCESS:
-                    self.get_logger().error(f"Failed to write position to ID {servo_id}")
 
 def main(args=None):
     rclpy.init(args=args)
