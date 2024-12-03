@@ -21,14 +21,8 @@ def generate_launch_description():
                     Command(['cat ', urdf_file]),
                     value_type=str),
                 'frame_prefix': '',
+                'publish_default_positions': False,
             }]
-        ),
-
-        # Joint State Publisher GUI
-        Node(
-            package='joint_state_publisher_gui',
-            executable='joint_state_publisher_gui',
-            name='joint_state_publisher_gui',
         ),
 
         # RVIZ2
@@ -38,7 +32,7 @@ def generate_launch_description():
             name='rviz2',
         ),
 
-        # Your Servo Driver Node
+        # Servo Driver Node
         Node(
             package='robot_arm_control',
             executable='servo_driver',

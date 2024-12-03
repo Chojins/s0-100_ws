@@ -2,22 +2,23 @@
 <!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
      Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
-<robot name="robot_arm">
+<robot
+  name="robot_arm">
   <link
     name="Base">
     <inertial>
       <origin
-        xyz="-1.55220299024015E-10 0.0275980388649202 0.0272094138963763"
+        xyz="-2.45960666746703E-07 0.0311418169687909 0.0175746661003382"
         rpy="0 0 0" />
       <mass
-        value="0.146962928243327" />
+        value="0.193184127927598" />
       <inertia
-        ixx="9.5191642834079E-05"
-        ixy="2.02405274856147E-12"
-        ixz="1.46514387606669E-13"
-        iyy="0.000123785814019492"
-        iyz="1.84608762035329E-05"
-        izz="0.000137926707148466" />
+        ixx="0.000137030709467877"
+        ixy="2.10136126944992E-08"
+        ixz="4.24087422551286E-09"
+        iyy="0.000169089551209259"
+        iyz="2.26514711036514E-05"
+        izz="0.000145097720857224" />
     </inertial>
     <visual>
       <origin
@@ -44,20 +45,20 @@
     </collision>
   </link>
   <link
-    name="Shoulder_Rotation_Pitch">
+    name="Rotation_Pitch">
     <inertial>
       <origin
-        xyz="-0.00511938391873139 0.0678779339349912 -0.000127472379243391"
+        xyz="-9.07886224712597E-05 0.0590971820568318 0.031089016892169"
         rpy="0 0 0" />
       <mass
-        value="0.111780100254674" />
+        value="0.119226314127197" />
       <inertia
-        ixx="7.03890301713851E-05"
-        ixy="-1.55093016866869E-05"
-        ixz="1.67387694867946E-07"
-        iyy="3.32352621027575E-05"
-        iyz="9.30705606418705E-07"
-        izz="7.08694473647387E-05" />
+        ixx="5.90408775624429E-05"
+        ixy="4.90800532852998E-07"
+        ixz="-5.90451772654387E-08"
+        iyy="3.21498601038881E-05"
+        iyz="-4.58026206663885E-06"
+        izz="5.86058514263952E-05" />
     </inertial>
     <visual>
       <origin
@@ -65,7 +66,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://robot_arm_control/meshes/Shoulder_Rotation_Pitch.STL" />
+          filename="package://robot_arm_control/meshes/Rotation_Pitch.STL" />
       </geometry>
       <material
         name="">
@@ -79,20 +80,20 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://robot_arm_control/meshes/Shoulder_Rotation_Pitch.STL" />
+          filename="package://robot_arm_control/meshes/Rotation_Pitch.STL" />
       </geometry>
     </collision>
   </link>
   <joint
-    name="Shoulder_Rotation"
+    name="Rotation"
     type="continuous">
     <origin
-      xyz="0 -0.0452 0.0181"
-      rpy="1.5708 0 1.5708" />
+      xyz="0 -0.0452 0.0165"
+      rpy="1.5708 0 0" />
     <parent
       link="Base" />
     <child
-      link="Shoulder_Rotation_Pitch" />
+      link="Rotation_Pitch" />
     <axis
       xyz="0 1 0" />
   </joint>
@@ -100,17 +101,17 @@
     name="Upper_Arm">
     <inertial>
       <origin
-        xyz="-0.0693113774468845 0.00293741346964818 -7.61279219025209E-07"
+        xyz="-1.7205170190925E-05 0.0701802156327694 0.00310545118155671"
         rpy="0 0 0" />
       <mass
-        value="0.167601391353176" />
+        value="0.162409284599177" />
       <inertia
-        ixx="7.75332201021328E-05"
-        ixy="-2.10765620509824E-06"
-        ixz="7.52685919931984E-07"
-        iyy="0.000233751202018378"
-        iyz="-1.63496162538793E-07"
-        izz="0.000180452754687364" />
+        ixx="0.000167153146617081"
+        ixy="1.03902689187701E-06"
+        ixz="-1.20161820645189E-08"
+        iyy="7.01946992214245E-05"
+        iyz="2.11884806298698E-06"
+        izz="0.000213280241160769" />
     </inertial>
     <visual>
       <origin
@@ -137,33 +138,33 @@
     </collision>
   </link>
   <joint
-    name="Shoulder_Pitch"
+    name="Pitch"
     type="continuous">
     <origin
-      xyz="0.000125 0.1086 0"
-      rpy="3.1416 0 -1.5708" />
+      xyz="0 0.1025 0.0306"
+      rpy="0 0 0" />
     <parent
-      link="Shoulder_Rotation_Pitch" />
+      link="Rotation_Pitch" />
     <child
       link="Upper_Arm" />
     <axis
-      xyz="0 0 1" />
+      xyz="1 0 0" />
   </joint>
   <link
     name="Lower_Arm">
     <inertial>
       <origin
-        xyz="-0.0588290275819227 0.0021495318374051 0.000146772621039401"
+        xyz="-0.00339603710186651 0.00137796353960074 0.0768006751156044"
         rpy="0 0 0" />
       <mass
-        value="0.142523221917339" />
+        value="0.147967774582291" />
       <inertia
-        ixx="6.29078989235053E-05"
-        ixy="3.79294618448135E-06"
-        ixz="1.70733512134003E-06"
-        iyy="0.000146811163948232"
-        iyz="-2.1474403445678E-07"
-        izz="0.000102145070617562" />
+        ixx="0.000105333995841409"
+        ixy="1.73059237226499E-07"
+        ixz="-1.1720305455211E-05"
+        iyy="0.000138766654485212"
+        iyz="1.77429964684103E-06"
+        izz="5.08741652515214E-05" />
     </inertial>
     <visual>
       <origin
@@ -193,30 +194,30 @@
     name="Elbow"
     type="continuous">
     <origin
-      xyz="-0.11238 0.0282 0"
-      rpy="0 0 -2.2391" />
+      xyz="0 0.11257 0.028"
+      rpy="0 0 0" />
     <parent
       link="Upper_Arm" />
     <child
       link="Lower_Arm" />
     <axis
-      xyz="0 0 1" />
+      xyz="1 0 0" />
   </joint>
   <link
     name="Wrist_Pitch_Roll">
     <inertial>
       <origin
-        xyz="-6.28656116854598E-09 -0.0087849429576346 -0.0309177852835532"
+        xyz="-0.00852653127372418 -0.0352278997897927 -2.34622481569413E-05"
         rpy="0 0 0" />
       <mass
-        value="0.106401896179987" />
+        value="0.066132067097723" />
       <inertia
-        ixx="4.78947074364113E-05"
-        ixy="-1.33871782943846E-11"
-        ixz="-8.95740683864277E-12"
-        iyy="7.01088408487287E-05"
-        iyz="-5.49748507471695E-06"
-        izz="6.17958653539553E-05" />
+        ixx="1.95717492443445E-05"
+        ixy="-6.62714374412293E-07"
+        ixz="5.20089016442066E-09"
+        iyy="2.38028417569933E-05"
+        iyz="4.09549055863776E-08"
+        izz="3.4540143384536E-05" />
     </inertial>
     <visual>
       <origin
@@ -246,8 +247,8 @@
     name="Wrist_Pitch"
     type="continuous">
     <origin
-      xyz="-0.1102 0.005375 0"
-      rpy="0.90254 1.5708 0" />
+      xyz="0 0.0052 0.1349"
+      rpy="0 0 0" />
     <parent
       link="Lower_Arm" />
     <child
@@ -256,20 +257,20 @@
       xyz="1 0 0" />
   </joint>
   <link
-    name="Fixed_Gripper">
+    name="Fixed_Jaw">
     <inertial>
       <origin
-        xyz="-0.00772179942650385 -0.000555295978140996 0.0316941559340959"
+        xyz="0.00552376906426563 -0.0280167153359021 0.000483582592841092"
         rpy="0 0 0" />
       <mass
-        value="0.11710741874408" />
+        value="0.0929859131176897" />
       <inertia
-        ixx="5.67526018031759E-05"
-        ixy="1.04098982658207E-06"
-        ixz="8.53596077253277E-06"
-        iyy="5.78441834179299E-05"
-        iyz="-2.86014969245207E-07"
-        izz="4.22399193495317E-05" />
+        ixx="4.3328249304211E-05"
+        ixy="7.09654328670947E-06"
+        ixz="5.99838530879484E-07"
+        iyy="3.04451747368212E-05"
+        iyz="-1.58743247545413E-07"
+        izz="5.02460913506734E-05" />
     </inertial>
     <visual>
       <origin
@@ -277,7 +278,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://robot_arm_control/meshes/Fixed_Gripper.STL" />
+          filename="package://robot_arm_control/meshes/Fixed_Jaw.STL" />
       </geometry>
       <material
         name="">
@@ -291,7 +292,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://robot_arm_control/meshes/Fixed_Gripper.STL" />
+          filename="package://robot_arm_control/meshes/Fixed_Jaw.STL" />
       </geometry>
     </collision>
   </link>
@@ -299,30 +300,30 @@
     name="Wrist_Roll"
     type="continuous">
     <origin
-      xyz="0 0.002 -0.0545"
-      rpy="3.1416 0 3.1416" />
+      xyz="0 -0.0601 0"
+      rpy="0 0 0" />
     <parent
       link="Wrist_Pitch_Roll" />
     <child
-      link="Fixed_Gripper" />
+      link="Fixed_Jaw" />
     <axis
-      xyz="0 0 1" />
+      xyz="0 1 0" />
   </joint>
   <link
-    name="Moving_Jaw">
+    name="Moving Jaw">
     <inertial>
       <origin
-        xyz="-0.0033838985185846 -0.0322884362122416 0.000144458547748166"
+        xyz="-0.00161744605468241 -0.0303472584046471 0.000449645961853651"
         rpy="0 0 0" />
       <mass
-        value="0.0347149174448153" />
+        value="0.0202443794940372" />
       <inertia
-        ixx="1.36949844449711E-05"
-        ixy="-5.63192124555278E-07"
-        ixz="-5.74449907399212E-09"
-        iyy="7.04089001130743E-06"
-        iyz="-1.05361496046931E-07"
-        izz="8.28976960805291E-06" />
+        ixx="1.10911325081525E-05"
+        ixy="-5.35076503033314E-07"
+        ixz="-9.46105662101403E-09"
+        iyy="3.03576451001973E-06"
+        iyz="-1.71146075110632E-07"
+        izz="8.9916083370498E-06" />
     </inertial>
     <visual>
       <origin
@@ -349,15 +350,15 @@
     </collision>
   </link>
   <joint
-    name="Gripper"
+    name="Jaw"
     type="continuous">
     <origin
-      xyz="0.0202 0 0.024375"
-      rpy="-1.5708 0 0" />
+      xyz="-0.0202 -0.0244 0"
+      rpy="3.1416 0 3.1416" />
     <parent
-      link="Fixed_Gripper" />
+      link="Fixed_Jaw" />
     <child
-      link="Moving_Jaw" />
+      link="Moving Jaw" />
     <axis
       xyz="0 0 1" />
   </joint>

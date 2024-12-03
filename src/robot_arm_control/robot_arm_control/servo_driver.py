@@ -20,7 +20,7 @@ DEVICE_NAME = '/dev/ttyACM0'  # Adjust this to match your port
 
 # Define your servo IDs
 SERVO_IDS = [1, 2, 3, 4, 5, 6]  # Adjust these to match your servo IDs
-JOINT_NAMES = ['Shoulder_Rotation', 'Shoulder_Pitch', 'Elbow', 'Wrist_Pitch', 'Wrist_Roll', 'Gripper']  # Adjust names
+JOINT_NAMES = ['Rotation', 'Pitch', 'Elbow', 'Wrist_Pitch', 'Wrist_Roll', 'Jaw']  # Adjust names
 
 class ServoDriver(Node):
     def __init__(self):
