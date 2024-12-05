@@ -74,7 +74,7 @@ class ServoDriver(Node):
             pos = self.read_position(servo_id)
             if pos is not None:
                 # Convert from servo units to radians (adjust conversion as needed)
-                pos_rad = float(pos) * (3.14159 / 2048.0)  # Assuming 0-4095 range maps to 0-2π
+                pos_rad = float(pos) * (3.14159 / 2048.0) - 3.14159  # Assuming 0-4095 range maps to 0-2π
                 positions.append(pos_rad)
             else:
                 positions.append(0.0)

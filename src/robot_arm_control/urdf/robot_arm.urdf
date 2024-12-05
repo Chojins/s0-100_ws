@@ -95,7 +95,7 @@
     <child
       link="Rotation_Pitch" />
     <axis
-      xyz="0 1 0" />
+      xyz="0 -1 0" />
   </joint>
   <link
     name="Upper_Arm">
@@ -248,7 +248,7 @@
     type="continuous">
     <origin
       xyz="0 0.0052 0.1349"
-      rpy="0 0 0" />
+      rpy="-1.5708 0 0" />
     <parent
       link="Lower_Arm" />
     <child
@@ -301,7 +301,7 @@
     type="continuous">
     <origin
       xyz="0 -0.0601 0"
-      rpy="0 0 0" />
+      rpy="0 1.5708 0" />
     <parent
       link="Wrist_Pitch_Roll" />
     <child

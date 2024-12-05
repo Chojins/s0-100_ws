@@ -1,0 +1,14 @@
+#Build
+cd ~/so-100_ws
+colcon build
+source install/setup.bash
+
+#launch with display
+ros2 launch robot_arm_control display.launch.py
+
+#run the driver
+ros2 run robot_arm_control servo_driver
+
+#echo the joint states
+ros2 topic echo /joint_states
+
