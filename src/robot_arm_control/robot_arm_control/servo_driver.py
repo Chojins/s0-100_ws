@@ -5,14 +5,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import JointState
 from builtin_interfaces.msg import Time
 
-import scservo_sdk
-from scservo_sdk import (
-    PortHandler,
-    PacketHandler,
-    GroupSyncRead,
-    GroupSyncWrite,
-    COMM_SUCCESS,
-)
+from robot_arm_control.scservo_sdk import *
 
 PROTOCOL_VERSION = 0
 BAUDRATE = 1_000_000
@@ -46,11 +39,23 @@ class ServoDriver(Node):
             self.get_logger().error("Failed to change the baudrate")
             return
 
-        # Only create publisher, remove subscriber to prevent movement commands
-        self.publisher = self.create_publisher(JointState, 'joint_states', 10)
+        # Change publisher to publish directly to joint_states
+        self.publisher = self.create_publisher(
+            JointState, 
+            'joint_states',  # Publish directly to joint_states
+            10
+        )
 
         # Timer for publishing current positions
         self.timer = self.create_timer(0.1, self.publish_joint_states)
+
+        # Add subscriber for joint commands
+        self.command_subscription = self.create_subscription(
+            JointState,
+            'joint_commands',  # Subscribe to commands
+            self.command_callback,
+            10
+        )
 
     def read_position(self, servo_id):
         """Read the current position of a servo"""
@@ -73,8 +78,8 @@ class ServoDriver(Node):
         for servo_id in SERVO_IDS:
             pos = self.read_position(servo_id)
             if pos is not None:
-                # Convert from servo units to radians (adjust conversion as needed)
-                pos_rad = float(pos) * (3.14159 / 2048.0) - 3.14159  # Assuming 0-4095 range maps to 0-2π
+                # Convert from servo units to radians
+                pos_rad = float(pos) * (3.14159 / 2048.0) - 3.14159
                 positions.append(pos_rad)
             else:
                 positions.append(0.0)
@@ -84,6 +89,29 @@ class ServoDriver(Node):
         msg.effort = []
         
         self.publisher.publish(msg)
+
+    def command_callback(self, msg):
+        """Handle incoming joint commands"""
+        try:
+            for i, (position, name) in enumerate(zip(msg.position, msg.name)):
+                if i < len(SERVO_IDS):
+                    servo_id = SERVO_IDS[i]
+                    # Convert from radians to servo position
+                    pos = int((position + 3.14159) * 2048 / 3.14159)
+                    pos = max(0, min(4095, pos))  # Limit range
+                    
+                    # Write position to servo
+                    result = self.packet_handler.write2ByteTxRx(
+                        self.port_handler, 
+                        servo_id, 
+                        30,  # Goal Position Address
+                        pos
+                    )
+                    if result != COMM_SUCCESS:
+                        self.get_logger().warning(f"Failed to write position for ID {servo_id}")
+                    
+        except Exception as e:
+            self.get_logger().error(f"Error in command callback: {e}")
 
 def main(args=None):
     rclpy.init(args=args)

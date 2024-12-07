@@ -362,4 +362,33 @@
     <axis
       xyz="0 0 1" />
   </joint>
+  <ros2_control name="servo_controller" type="system">
+    <hardware>
+      <plugin>robot_arm_control/ServoHardware</plugin>
+    </hardware>
+    <joint name="Rotation">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+    </joint>
+    <joint name="Pitch">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+    </joint>
+    <joint name="Elbow">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+    </joint>
+    <joint name="Wrist_Pitch">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+    </joint>
+    <joint name="Wrist_Roll">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+    </joint>
+    <joint name="Jaw">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+    </joint>
+  </ros2_control>
 </robot>
