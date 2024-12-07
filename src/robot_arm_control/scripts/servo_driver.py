@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-#!/usr/bin/env python3
 
 import rclpy
 from rclpy.node import Node
@@ -9,12 +8,19 @@ from builtin_interfaces.msg import Time
 from robot_arm_control.scservo_sdk import *
 
 PROTOCOL_VERSION = 0
-BAUDRATE = 1_000_000
-DEVICE_NAME = '/dev/ttyACM0'  # Adjust this to match your port
+BAUDRATE = 1_000_000  # STS3215 uses 1Mbps
+DEVICE_NAME = '/dev/ttyACM0'
 
 # Define your servo IDs
-SERVO_IDS = [1, 2, 3, 4, 5, 6]  # Adjust these to match your servo IDs
-JOINT_NAMES = ['Rotation', 'Pitch', 'Elbow', 'Wrist_Pitch', 'Wrist_Roll', 'Jaw']  # Adjust names
+SERVO_IDS = [1, 2, 3, 4, 5, 6]  # SO-100 uses servos 1-6
+JOINT_NAMES = ['Rotation', 'Pitch', 'Elbow', 'Wrist_Pitch', 'Wrist_Roll', 'Jaw']
+
+# Control Table Addresses for STS3215
+ADDR_TORQUE_ENABLE = 40      # 0x28
+ADDR_OPERATING_MODE = 11     # 0x0B
+ADDR_GOAL_POSITION = 42      # 0x2A
+ADDR_PRESENT_POSITION = 56   # 0x38
+ADDR_PRESENT_VOLTAGE = 62    # 0x3E
 
 class ServoDriver(Node):
     def __init__(self):
@@ -40,10 +46,46 @@ class ServoDriver(Node):
             self.get_logger().error("Failed to change the baudrate")
             return
 
+        # After port setup and before torque enable
+        for servo_id in SERVO_IDS:
+            # Read voltage to verify communication
+            voltage, result, error = self.packet_handler.read1ByteTxRx(
+                self.port_handler,
+                servo_id,
+                ADDR_PRESENT_VOLTAGE
+            )
+            self.get_logger().info(f"Servo {servo_id} voltage reading: {voltage/10.0}V")
+
+            # First disable torque
+            result, error = self.packet_handler.write1ByteTxRx(
+                self.port_handler,
+                servo_id,
+                ADDR_TORQUE_ENABLE,
+                0    # Disable
+            )
+            
+            # Set to Position Control Mode
+            result, error = self.packet_handler.write1ByteTxRx(
+                self.port_handler,
+                servo_id,
+                ADDR_OPERATING_MODE,
+                0    # Position Control Mode
+            )
+            self.get_logger().info(f"Set servo {servo_id} to position mode: result={result}, error={error}")
+
+            # Enable torque
+            result, error = self.packet_handler.write1ByteTxRx(
+                self.port_handler,
+                servo_id,
+                ADDR_TORQUE_ENABLE,
+                1    # Enable
+            )
+            self.get_logger().info(f"Torque enable result for servo {servo_id}: {result}, error: {error}")
+
         # Change publisher to publish directly to joint_states
         self.publisher = self.create_publisher(
             JointState, 
-            'joint_states',  # Publish directly to joint_states
+            'joint_states',
             10
         )
 
@@ -53,7 +95,7 @@ class ServoDriver(Node):
         # Add subscriber for joint commands
         self.command_subscription = self.create_subscription(
             JointState,
-            'joint_commands',  # Subscribe to commands
+            'joint_commands',
             self.command_callback,
             10
         )
@@ -94,22 +136,36 @@ class ServoDriver(Node):
     def command_callback(self, msg):
         """Handle incoming joint commands"""
         try:
+            self.get_logger().info("Received command message")
             for i, (position, name) in enumerate(zip(msg.position, msg.name)):
                 if i < len(SERVO_IDS):
                     servo_id = SERVO_IDS[i]
-                    # Convert from radians to servo position
-                    pos = int((position + 3.14159) * 2048 / 3.14159)
+                    
+                    # Convert from radians to servo position (corrected formula)
+                    # 2048 is center, 2048 units = 180 degrees = π radians
+                    pos = int(2048 + (position * 2048 / 3.14159))
                     pos = max(0, min(4095, pos))  # Limit range
                     
-                    # Write position to servo
-                    result = self.packet_handler.write2ByteTxRx(
+                    self.get_logger().info(f"Converting {position} radians to servo position {pos}")
+                    
+                    # Write goal position
+                    result, error = self.packet_handler.write2ByteTxRx(
                         self.port_handler, 
                         servo_id, 
-                        30,  # Goal Position Address
+                        ADDR_GOAL_POSITION,
                         pos
                     )
-                    if result != COMM_SUCCESS:
-                        self.get_logger().warning(f"Failed to write position for ID {servo_id}")
+                    self.get_logger().info(f"Write result: {result}, error: {error}")
+                    
+                    time.sleep(0.1)
+                    
+                    # Read position to verify
+                    new_pos, result, error = self.packet_handler.read2ByteTxRx(
+                        self.port_handler,
+                        servo_id,
+                        ADDR_PRESENT_POSITION
+                    )
+                    self.get_logger().info(f"Position after move: {new_pos}")
                     
         except Exception as e:
             self.get_logger().error(f"Error in command callback: {e}")
