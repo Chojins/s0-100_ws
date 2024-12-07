@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import RegisterEventHandler
+from launch.actions import RegisterEventHandler, TimerAction
 from launch.event_handlers import OnProcessExit
 from launch_ros.actions import Node
 from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
@@ -45,42 +45,65 @@ def generate_launch_description():
         },
     )
 
-    joint_state_broadcaster_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
-        output="screen",
+    # Delay the joint state broadcaster spawner
+    delayed_joint_state_broadcaster = TimerAction(
+        period=2.0,
+        actions=[
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
+                output="screen",
+            )
+        ]
     )
 
-    robot_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_trajectory_controller", "--controller-manager", "/controller_manager"],
-        output="screen",
+    # Delay the trajectory controller spawner and make it dependent on joint state broadcaster
+    delayed_robot_controller = TimerAction(
+        period=3.0,
+        actions=[
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=["joint_trajectory_controller", "--controller-manager", "/controller_manager"],
+                output="screen",
+            )
+        ]
     )
 
-    # RVIZ2
-    rviz_node = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
+    # Add delay for RViz after controllers are loaded
+    delay_rviz = TimerAction(
+        period=4.0,
+        actions=[
+            Node(
+                package='rviz2',
+                executable='rviz2',
+                name='rviz2',
+            )
+        ]
     )
 
-    # Servo Driver Node
-    servo_driver_node = Node(
-        package='robot_arm_control',
-        executable='servo_driver',
-        name='servo_driver',
-        output='screen',
+    # Servo Driver Node - start after controller manager
+    delayed_servo_driver = TimerAction(
+        period=1.0,
+        actions=[
+            Node(
+                package='robot_arm_control',
+                executable='servo_driver',
+                name='servo_driver',
+                output='screen',
+            )
+        ]
     )
 
     nodes = [
         robot_state_pub_node,
         controller_manager,
-        joint_state_broadcaster_spawner,
-        robot_controller_spawner,
-        rviz_node,
-        servo_driver_node,
+        delayed_servo_driver,
+        delayed_joint_state_broadcaster,
+        delayed_robot_controller,
+        delay_rviz,
     ]
 
     return LaunchDescription(nodes)
+

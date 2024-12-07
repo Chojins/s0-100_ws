@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 project(robot_arm_control)
 
-include(python_setup.cmake OPTIONAL)
-
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
@@ -49,35 +47,37 @@ install(
 # Install Python modules
 ament_python_install_package(${PROJECT_NAME})
 
-# Install Python executables
+# Install Python scripts with executable permissions
 install(PROGRAMS
-  robot_arm_control/servo_driver.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/servo_driver.py
   DESTINATION lib/${PROJECT_NAME}
   RENAME servo_driver
 )
 
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/setup.py)
-    execute_process(
-        COMMAND python3 setup.py build
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    )
-endif()
-
-# Install launch files
-install(DIRECTORY
-  launch
+# Install directories
+install(
+  DIRECTORY
+    config
+    launch
+    urdf
+    meshes
+    hardware_plugin
   DESTINATION share/${PROJECT_NAME}
 )
 
-# Install other resources
-install(DIRECTORY
-  urdf
-  meshes
-  config
-  DESTINATION share/${PROJECT_NAME}
+# Export hardware plugin
+pluginlib_export_plugin_description_file(
+  hardware_interface
+  hardware_plugin/servo_hardware.xml
 )
 
-# Install hardware plugin
-pluginlib_export_plugin_description_file(hardware_interface hardware_plugin/servo_hardware.xml)
+# Export dependencies
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+ament_export_dependencies(
+  hardware_interface
+  pluginlib
+  rclcpp
+)
 
-ament_package() 
+ament_package()

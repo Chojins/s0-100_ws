@@ -1,9 +1,9 @@
 <library path="robot_arm_control">
-  <class name="robot_arm_control/ServoHardware"
-         type="robot_arm_control::ServoHardware"
-         base_class_type="hardware_interface::SystemInterface">
-    <description>
-      Hardware Interface for Servo motors
-    </description>
-  </class>
-</library>
+    <class name="robot_arm_control/ServoHardware"
+           type="robot_arm_control::ServoHardware"
+           base_class_type="hardware_interface::SystemInterface">
+        <description>
+            Hardware Interface for SCServo motors
+        </description>
+    </class>
+</library> 

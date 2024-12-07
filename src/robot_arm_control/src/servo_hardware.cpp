@@ -3,24 +3,42 @@
 
 namespace robot_arm_control
 {
-hardware_interface::CallbackReturn ServoHardware::on_init(const hardware_interface::HardwareInfo & info)
+hardware_interface::CallbackReturn ServoHardware::on_init(
+  const hardware_interface::HardwareInfo & info)
 {
-  if (hardware_interface::SystemInterface::on_init(info) != hardware_interface::CallbackReturn::SUCCESS)
+  if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS)
   {
-    RCLCPP_ERROR(rclcpp::get_logger("ServoHardware"), "Failed to initialize base class");
-    return hardware_interface::CallbackReturn::ERROR;
+    return CallbackReturn::ERROR;
   }
 
+  // Initialize storage for command and state interfaces
   hw_positions_.resize(info_.joints.size(), 0.0);
   hw_commands_.resize(info_.joints.size(), 0.0);
 
-  for (const auto & joint : info_.joints) {
-    RCLCPP_INFO(
-      rclcpp::get_logger("ServoHardware"),
+  for (const hardware_interface::ComponentInfo & joint : info_.joints)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("ServoHardware"), 
       "Found joint '%s' in URDF", joint.name.c_str());
+    
+    // Verify that the joint has both command and state interfaces
+    if (joint.command_interfaces.size() != 1 ||
+        joint.command_interfaces[0].name != hardware_interface::HW_IF_POSITION)
+    {
+      RCLCPP_ERROR(rclcpp::get_logger("ServoHardware"),
+        "Joint '%s' has incorrect command interfaces", joint.name.c_str());
+      return CallbackReturn::ERROR;
+    }
+
+    if (joint.state_interfaces.size() != 1 ||
+        joint.state_interfaces[0].name != hardware_interface::HW_IF_POSITION)
+    {
+      RCLCPP_ERROR(rclcpp::get_logger("ServoHardware"),
+        "Joint '%s' has incorrect state interfaces", joint.name.c_str());
+      return CallbackReturn::ERROR;
+    }
   }
 
-  return hardware_interface::CallbackReturn::SUCCESS;
+  return CallbackReturn::SUCCESS;
 }
 
 std::vector<hardware_interface::StateInterface> ServoHardware::export_state_interfaces()
@@ -29,16 +47,23 @@ std::vector<hardware_interface::StateInterface> ServoHardware::export_state_inte
   
   RCLCPP_INFO(
     rclcpp::get_logger("ServoHardware"),
-    "Exporting state interfaces for %zu joints", info_.joints.size());
+    "Starting to export %zu state interfaces", info_.joints.size());
 
   for (size_t i = 0; i < info_.joints.size(); i++)
   {
     RCLCPP_INFO(
       rclcpp::get_logger("ServoHardware"),
-      "Adding state interface for joint '%s'", info_.joints[i].name.c_str());
+      "Creating state interface for joint '%s'", info_.joints[i].name.c_str());
 
-    state_interfaces.emplace_back(hardware_interface::StateInterface(
-      info_.joints[i].name, hardware_interface::HW_IF_POSITION, &hw_positions_[i]));
+    state_interfaces.emplace_back(
+      hardware_interface::StateInterface(
+        info_.joints[i].name,
+        hardware_interface::HW_IF_POSITION,
+        &hw_positions_[i]));
+    
+    RCLCPP_INFO(
+      rclcpp::get_logger("ServoHardware"),
+      "Successfully added state interface for joint '%s'", info_.joints[i].name.c_str());
   }
 
   RCLCPP_INFO(
@@ -52,23 +77,16 @@ std::vector<hardware_interface::CommandInterface> ServoHardware::export_command_
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces;
   
-  RCLCPP_INFO(
-    rclcpp::get_logger("ServoHardware"),
-    "Exporting command interfaces for %zu joints", info_.joints.size());
-
   for (size_t i = 0; i < info_.joints.size(); i++)
   {
-    RCLCPP_INFO(
-      rclcpp::get_logger("ServoHardware"),
-      "Adding command interface for joint '%s'", info_.joints[i].name.c_str());
-
-    command_interfaces.emplace_back(hardware_interface::CommandInterface(
-      info_.joints[i].name, hardware_interface::HW_IF_POSITION, &hw_commands_[i]));
+    command_interfaces.emplace_back(
+      info_.joints[i].name,
+      hardware_interface::HW_IF_POSITION,
+      &hw_commands_[i]);
+    
+    RCLCPP_INFO(rclcpp::get_logger("ServoHardware"),
+      "Exported command interface for joint '%s'", info_.joints[i].name.c_str());
   }
-
-  RCLCPP_INFO(
-    rclcpp::get_logger("ServoHardware"),
-    "Exported %zu command interfaces", command_interfaces.size());
 
   return command_interfaces;
 }
@@ -99,7 +117,7 @@ hardware_interface::return_type ServoHardware::read(const rclcpp::Time &, const 
 {
   for (size_t i = 0; i < hw_positions_.size(); i++) {
     RCLCPP_DEBUG(rclcpp::get_logger("ServoHardware"), 
-      "Got position state %.5f for joint %d", hw_positions_[i], i);
+      "Got position state %.5f for joint %zu", hw_positions_[i], i);
   }
   return hardware_interface::return_type::OK;
 }
@@ -107,9 +125,8 @@ hardware_interface::return_type ServoHardware::read(const rclcpp::Time &, const 
 hardware_interface::return_type ServoHardware::write(const rclcpp::Time &, const rclcpp::Duration &)
 {
   for (size_t i = 0; i < hw_commands_.size(); i++) {
-    // Here you would send commands to your actual hardware
     RCLCPP_DEBUG(rclcpp::get_logger("ServoHardware"), 
-      "Writing command %.5f for joint %d", hw_commands_[i], i);
+      "Writing command %.5f for joint %zu", hw_commands_[i], i);
     
     // For testing, copy commands to positions
     hw_positions_[i] = hw_commands_[i];
