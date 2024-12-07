@@ -12,7 +12,17 @@ joint_state_broadcaster:
   ros__parameters:
     type: joint_state_broadcaster/JointStateBroadcaster
     publish_rate: 50
-    
+    use_local_topics: true
+    state_interfaces:
+      - position
+    interfaces:
+      - Rotation/position
+      - Pitch/position
+      - Elbow/position
+      - Wrist_Pitch/position
+      - Wrist_Roll/position
+      - Jaw/position
+
 joint_trajectory_controller:
   ros__parameters:
     type: joint_trajectory_controller/JointTrajectoryController
@@ -24,7 +34,6 @@ joint_trajectory_controller:
       - Wrist_Roll
       - Jaw
     
-    interface_name: position
     command_interfaces:
       - position
     
@@ -35,6 +44,4 @@ joint_trajectory_controller:
     action_monitor_rate: 20.0
 
     allow_partial_joints_goal: true
-    constraints:
-      stopped_velocity_tolerance: 0.01
-      goal_time: 0.0
+    use_local_topics: true
